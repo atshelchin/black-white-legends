@@ -1,6 +1,6 @@
-use bevy::prelude::*;
 use super::components::StoneColor;
-use super::config::{GoBoardConfig, BoardSize};
+use super::config::{BoardSize, GoBoardConfig};
+use bevy::prelude::*;
 
 /// 当前棋盘配置资源
 #[derive(Resource)]
@@ -46,7 +46,7 @@ impl BoardState {
             ..Default::default()
         }
     }
-    
+
     /// 获取指定位置的棋子
     pub fn get_stone(&self, x: i32, y: i32) -> Option<StoneColor> {
         if x >= 0 && x < 19 && y >= 0 && y < 19 {
@@ -55,7 +55,7 @@ impl BoardState {
             None
         }
     }
-    
+
     /// 放置棋子
     pub fn place_stone(&mut self, x: i32, y: i32, color: StoneColor) -> bool {
         if x >= 0 && x < self.board_size.get_value() && y >= 0 && y < self.board_size.get_value() {
@@ -69,7 +69,7 @@ impl BoardState {
         }
         false
     }
-    
+
     /// 移除棋子
     pub fn remove_stone(&mut self, x: i32, y: i32) {
         if x >= 0 && x < 19 && y >= 0 && y < 19 {
@@ -77,7 +77,7 @@ impl BoardState {
             self.move_numbers[x as usize][y as usize] = None;
         }
     }
-    
+
     /// 清空棋盘
     pub fn clear(&mut self) {
         self.stones = [[None; 19]; 19];
@@ -88,20 +88,24 @@ impl BoardState {
         self.ko_position = None;
         self.last_move = None;
     }
-    
+
     /// 获取相邻位置
     pub fn get_neighbors(&self, x: i32, y: i32) -> Vec<(i32, i32)> {
         let mut neighbors = Vec::new();
         let directions = [(0, 1), (0, -1), (1, 0), (-1, 0)];
-        
+
         for (dx, dy) in directions {
             let nx = x + dx;
             let ny = y + dy;
-            if nx >= 0 && nx < self.board_size.get_value() && ny >= 0 && ny < self.board_size.get_value() {
+            if nx >= 0
+                && nx < self.board_size.get_value()
+                && ny >= 0
+                && ny < self.board_size.get_value()
+            {
                 neighbors.push((nx, ny));
             }
         }
-        
+
         neighbors
     }
 }

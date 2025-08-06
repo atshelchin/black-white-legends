@@ -6,7 +6,9 @@
       "Bash(cargo build:*)",
       "Bash(mkdir:*)",
       "Bash(ls:*)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(cargo fmt:*)",
+      "Bash(cargo fix:*)"
     ],
     "deny": []
   }

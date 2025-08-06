@@ -1,19 +1,13 @@
+use super::{components::StoneColor, config::GoBoardConfig, events::*, resources::*, systems::*};
 use bevy::prelude::*;
-use super::{
-    config::GoBoardConfig,
-    components::StoneColor,
-    events::*,
-    resources::*,
-    systems::*,
-};
 
 /// 围棋棋盘插件
-/// 
+///
 /// # 使用示例
 /// ```rust
 /// use bevy::prelude::*;
 /// use go_board_component::prelude::*;
-/// 
+///
 /// fn main() {
 ///     App::new()
 ///         .add_plugins(DefaultPlugins)
@@ -40,7 +34,7 @@ impl Plugin for GoBoardPlugin {
             .insert_resource(CurrentTurn(StoneColor::Black))
             .insert_resource(BoardState::new(self.initial_config.board_size))
             .insert_resource(GameHistory::default());
-        
+
         // 添加事件
         app.add_event::<RedrawBoardEvent>()
             .add_event::<UpdateBoardConfigEvent>()
@@ -52,14 +46,18 @@ impl Plugin for GoBoardPlugin {
             .add_event::<GameEndEvent>()
             .add_event::<LoadGameEvent>()
             .add_event::<SaveGameEvent>();
-        
+
         // 添加系统
-        app.add_systems(Update, (
-            handle_config_update,
-            handle_place_stone,
-            handle_board_redraw,
-            handle_clear_board,
-        ).chain());
+        app.add_systems(
+            Update,
+            (
+                handle_config_update,
+                handle_place_stone,
+                handle_board_redraw,
+                handle_clear_board,
+            )
+                .chain(),
+        );
     }
 }
 
@@ -74,32 +72,32 @@ impl GoBoardPluginBuilder {
             config: GoBoardConfig::default(),
         }
     }
-    
+
     pub fn with_board_size(mut self, size: super::config::BoardSize) -> Self {
         self.config.board_size = size;
         self
     }
-    
+
     pub fn with_coordinates(mut self, show: bool) -> Self {
         self.config.show_coordinates = show;
         self
     }
-    
+
     pub fn with_move_numbers(mut self, show: bool) -> Self {
         self.config.show_move_numbers = show;
         self
     }
-    
+
     pub fn with_captures(mut self, enable: bool) -> Self {
         self.config.enable_captures = enable;
         self
     }
-    
+
     pub fn with_ko_rule(mut self, enable: bool) -> Self {
         self.config.enable_ko_rule = enable;
         self
     }
-    
+
     pub fn build(self) -> GoBoardPlugin {
         GoBoardPlugin {
             initial_config: self.config,

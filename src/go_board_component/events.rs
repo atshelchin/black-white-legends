@@ -1,6 +1,6 @@
-use bevy::prelude::*;
 use super::components::StoneColor;
 use super::config::GoBoardConfig;
+use bevy::prelude::*;
 
 /// 重绘棋盘事件
 #[derive(Event)]
@@ -22,10 +22,10 @@ pub struct PlaceStoneEvent {
 /// 棋子动作类型
 #[derive(Debug, Clone, Copy)]
 pub enum StoneActionType {
-    Place,     // 落子
-    Capture,   // 提子
-    Pass,      // 虚手
-    Resign,    // 认输
+    Place,   // 落子
+    Capture, // 提子
+    Pass,    // 虚手
+    Resign,  // 认输
 }
 
 /// 棋子动作事件 - 更高层级的事件，可以触发游戏逻辑

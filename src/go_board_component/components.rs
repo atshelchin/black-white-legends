@@ -40,8 +40,11 @@ impl StoneColor {
 /// 棋子组件
 #[derive(Component)]
 pub struct Stone {
+    #[allow(dead_code)]
     pub color: StoneColor,
+    #[allow(dead_code)]
     pub position: (i32, i32),
+    #[allow(dead_code)]
     pub move_number: usize,
 }
 

@@ -4,9 +4,9 @@
 mod go_board_component;
 
 use bevy::prelude::*;
-use bevy::window::{PrimaryWindow, WindowResizeConstraints, MonitorSelection};
-use go_board_component::prelude::*;
+use bevy::window::{MonitorSelection, PrimaryWindow, WindowResizeConstraints};
 use go_board_component::plugin::GoBoardPluginBuilder;
+use go_board_component::prelude::*;
 use go_board_component::utils::CoordinateUtils;
 
 fn main() {
@@ -33,25 +33,25 @@ fn main() {
                 .with_move_numbers(false)
                 .with_captures(true)
                 .with_ko_rule(true)
-                .build()
+                .build(),
         )
         // 添加示例应用的系统
         .add_systems(Startup, (setup_camera, setup_ui, initial_board_draw))
-        .add_systems(Update, (
-            handle_keyboard_input, 
-            handle_window_resize, 
-            handle_mouse_hover,
-            handle_mouse_click, 
-            update_turn_display
-        ))
+        .add_systems(
+            Update,
+            (
+                handle_keyboard_input,
+                handle_window_resize,
+                handle_mouse_hover,
+                handle_mouse_click,
+                update_turn_display,
+            ),
+        )
         .run();
 }
 
 fn setup_camera(mut commands: Commands) {
-    commands.spawn((
-        Camera2d::default(),
-        Name::new("Main Camera"),
-    ));
+    commands.spawn((Camera2d::default(), Name::new("Main Camera")));
 }
 
 fn setup_ui(mut commands: Commands) {
@@ -81,11 +81,11 @@ struct HoverIndicator;
 fn initial_board_draw(
     mut redraw_events: EventWriter<go_board_component::events::RedrawBoardEvent>,
 ) {
-    redraw_events.send(go_board_component::events::RedrawBoardEvent);
+    redraw_events.write(go_board_component::events::RedrawBoardEvent);
 }
 
 fn handle_keyboard_input(
-    mut commands: Commands,
+    _commands: Commands,
     keyboard: Res<ButtonInput<KeyCode>>,
     mut config_events: EventWriter<go_board_component::events::UpdateBoardConfigEvent>,
     mut clear_events: EventWriter<go_board_component::events::ClearBoardEvent>,
@@ -95,7 +95,7 @@ fn handle_keyboard_input(
 ) {
     let mut new_config = None;
     let mut should_clear_board = false;
-    
+
     if keyboard.just_pressed(KeyCode::Digit1) {
         new_config = Some(GoBoardConfig {
             board_size: BoardSize::Nine,
@@ -144,7 +144,7 @@ fn handle_keyboard_input(
             window.mode = bevy::window::WindowMode::Windowed;
         }
     }
-    
+
     if let Some(config) = new_config {
         if should_clear_board {
             clear_events.write(go_board_component::events::ClearBoardEvent);
@@ -178,29 +178,29 @@ fn handle_mouse_hover(
     for entity in hover_query.iter() {
         commands.entity(entity).despawn();
     }
-    
+
     if !current_config.0.enable_hover_indicator {
         return;
     }
-    
+
     let Ok(window) = windows.single() else {
         return;
     };
-    
+
     let Some(cursor_position) = window.cursor_position() else {
         return;
     };
-    
+
     let Ok((camera, camera_transform)) = camera_query.single() else {
         return;
     };
-    
+
     let Ok(world_position) = camera.viewport_to_world_2d(camera_transform, cursor_position) else {
         return;
     };
-    
+
     let window_size = window.resolution.width().min(window.resolution.height());
-    
+
     if let Some((board_x, board_y)) = CoordinateUtils::world_to_board(
         world_position,
         current_config.0.board_size,
@@ -211,7 +211,7 @@ fn handle_mouse_hover(
         if board_state.get_stone(board_x, board_y).is_some() {
             return;
         }
-        
+
         // 绘制悬停指示器
         let world_pos = CoordinateUtils::board_to_world(
             (board_x, board_y),
@@ -219,17 +219,22 @@ fn handle_mouse_hover(
             window_size,
             current_config.0.adaptive_padding,
         );
-        
-        let padding = if current_config.0.adaptive_padding && window_size > 1400.0 { 50.0 } else { 100.0 };
+
+        let padding = if current_config.0.adaptive_padding && window_size > 1400.0 {
+            50.0
+        } else {
+            100.0
+        };
         let board_background_size = window_size - padding;
-        let cell_size = board_background_size / (current_config.0.board_size.get_value() as f32 + 1.0);
+        let cell_size =
+            board_background_size / (current_config.0.board_size.get_value() as f32 + 1.0);
         let stone_radius = cell_size * 0.45;
-        
+
         let hover_color = match current_turn.0 {
             StoneColor::Black => Color::srgba(0.1, 0.1, 0.1, 0.5),
             StoneColor::White => Color::srgba(0.95, 0.95, 0.95, 0.5),
         };
-        
+
         commands.spawn((
             Mesh2d(meshes.add(Circle::new(stone_radius))),
             MeshMaterial2d(materials.add(hover_color)),
@@ -251,25 +256,25 @@ fn handle_mouse_click(
     if !mouse_button.just_pressed(MouseButton::Left) {
         return;
     }
-    
+
     let Ok(window) = windows.single() else {
         return;
     };
-    
+
     let Some(cursor_position) = window.cursor_position() else {
         return;
     };
-    
+
     let Ok((camera, camera_transform)) = camera_query.single() else {
         return;
     };
-    
+
     let Ok(world_position) = camera.viewport_to_world_2d(camera_transform, cursor_position) else {
         return;
     };
-    
+
     let window_size = window.resolution.width().min(window.resolution.height());
-    
+
     if let Some((board_x, board_y)) = CoordinateUtils::world_to_board(
         world_position,
         current_config.0.board_size,
@@ -280,13 +285,13 @@ fn handle_mouse_click(
         if board_state.get_stone(board_x, board_y).is_some() {
             return;
         }
-        
+
         // 发送落子事件
         stone_events.write(go_board_component::events::PlaceStoneEvent {
             position: (board_x, board_y),
             color: current_turn.0,
         });
-        
+
         // 切换回合
         current_turn.0 = current_turn.0.opposite();
     }
